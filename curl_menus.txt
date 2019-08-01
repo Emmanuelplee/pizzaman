@@ -1,0 +1,63 @@
+curl -X POST -H"Content-Type: application/json" -d '{
+"persistent_menu": [{
+  "locale": "default",
+  "composer_input_disabled": false,
+  "call_to_actions": [{
+      "title": "PizzaMan ",
+      "type": "nested",
+      "call_to_actions": [{
+          "title": "Acerca",
+          "type": "postback",
+          "payload": "ABOUT_PAYLOAD"
+        },
+        {
+          "title": "Sucursales",
+          "type": "postback",
+          "payload": "LOCATIONS_PAYLOAD"
+        },
+        {
+          "title": "Ayuda",
+          "type": "postback",
+          "payload": "HELP_PAYLOAD"
+        },
+        {
+          "title": "Contacto",
+          "type": "postback",
+          "payload": "CONTACT_PAYLOAD"
+        }
+      ]
+    },
+    {
+      "title": "Menu de Productos",
+      "type": "nested",
+      "call_to_actions": [{
+          "title": "Pizzas",
+          "type": "postback",
+          "payload": "PIZZAS_PAYLOAD"
+        },
+        {
+          "title": "Especialidades",
+          "type": "postback",
+          "payload": "SPECIALS_PAYLOAD"
+        },
+        {
+          "title": "Bebidas",
+          "type": "postback",
+          "payload": "DRINKS_PAYLOAD"
+        },
+        {
+          "title": "Promociones",
+          "type": "postback",
+          "payload": "PROMOTIONS_PAYLOAD"
+        }
+      ]
+    },
+    {
+      "type": "web_url",
+      "title": "Pagina Web",
+      "url": "http://platzi.com/bots-messenger/",
+      "webview_height_ratio": "full"
+    }
+  ]
+}]
+}' "https://graph.facebook.com/v2.6/me/messenger_profile?access_token=EAAI9zhm29X4BAOfNxPfucLMVTrpRJg17WMG4Til0FsCHhQEsQZC3BBRB4baEFFRAm5MccC6cbqngQM7MYYP1l5gp2xHyjqG4hmMrSQrMOrHbuPy14v6f3GWMt9xSyEbrWZC1Xsj0ESERgXCWJ36ykEH9ko3vjwyWs6IjqxCzcKXSK8hAvF"
