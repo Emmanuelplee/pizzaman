@@ -75,9 +75,13 @@ function defaultMessage(senderId){
 }
 
 function handlePostback(senderId, payload){
+    console.log(payload)
     switch (payload) {
         case "GET_STARTED_PIZZAMAN":
             console.log(payload)
+        break;
+        case "PIZZAS_PAYLOAD":
+            showPizzas(senderId);
         break;
     }
 }
@@ -147,6 +151,48 @@ function callSendApi(response) {
 )
 }
 
+function showPizzas(senderId){
+    const messageData = {
+        "recipient": {
+            "id": senderId
+        },
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [
+                        {
+                            "title": "Peperoni",
+                            "subtitle": "Con todo del sabor del peperoni",
+                            "image_url": "https://www.facebook.com/colegiomariadelaesperanza/photos/a.232940890241905/1110950415774277/?type=3&theater",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "Elegir Peperoni",
+                                    "payload": "PEPERONI_PAYLOAD",
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Pollo BBQ",
+                            "subtitle": "Con todo el sabor del BBQ",
+                            "image_url": "https://www.facebook.com/colegiomariadelaesperanza/photos/a.232940890241905/1098016553734330/?type=3&theater",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "Elegir Pollo BBQ",
+                                    "payload": "BBQ_PAYLOAD",
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    callSendApi(messageData)
+}
 
 app.listen(app.get('port'), function(){
     console.log('Nuestro servidor esta funcionando en el puerto: ', app.get('port'));
