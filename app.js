@@ -1,37 +1,43 @@
-'use strict'
-
+'use strict' //Para modo estricto en java scritp
+    //Instanciamos nuestros paquetes isntalados
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
+
 const access_token = "EAAI9zhm29X4BAOfNxPfucLMVTrpRJg17WMG4Til0FsCHhQEsQZC3BBRB4baEFFRAm5MccC6cbqngQM7MYYP1l5gp2xHyjqG4hmMrSQrMOrHbuPy14v6f3GWMt9xSyEbrWZC1Xsj0ESERgXCWJ36ykEH9ko3vjwyWs6IjqxCzcKXSK8hAvF";
-
+    //Configuracion de un puerto en constante app extiende de express
 const app = express();
+app.set('port', 5000);//puerto a configurar parametro uno port y el segundo el numero de puerto
+app.use(bodyParser.json());//Para entender los elemtos json que recibe nuestra api
 
-app.set('port', 5000);
-app.use(bodyParser.json());
-
+//---Funcion para saber si funcion nuestra api---//
 app.get('/', function(req, response){
-    response.send('Hola mundo!!');
+    response.send('Hola mundo! <--Bienvenidos--> funcion de prueba');
 })
 
+/* Metodo webhook para verificar el token y la conexion con la api de facebook */
 app.get('/webhook/', function(req, response){
     if(req.query['hub.verify_token'] === 'pizzaman_token'){
         console.log('Tienes permisos');
         response.send(req.query['hub.challenge'])
     } else{
-        response.send('Pizzaman no tienes permisos.')
+        response.send('Pizza Man no tienes permisos.')
     }
 })
 
+/* Metodo webhook para recibir y enviar datos */
 app.post('/webhook/',function(req,res){
-    const webhook_event = req.body.entry[0];
+    const webhook_event = req.body.entry[0]; //asingnamos lo que resibimos por la req
+        // Validamos si hay message 
     if(webhook_event.messaging){
         webhook_event.messaging.forEach(event => {
-            handleEvent(event.sender.id, event);
-            // console.log('event', event);
+            // handleEvent(event.sender.id, event);
+            console.log('event', event);
+            manejadorMensajes(event);
             // handleMessage(event);
         })
     }
+    //Respuesta de status 200 exito
     res.sendStatus(200);
 })
 
@@ -42,24 +48,76 @@ function handleEvent(senderId, event){
         handlePostback(senderId, event.postback.payload)
     }
 }
+
+/* Manejador de mensajes */
+function manejadorMensajes (event){
+    const senderId = event.sender.id;
+    const messageText = event.message.text;
+    const messageData = {
+        recipient: {
+            id:senderId,
+        },
+        message:{
+            text: messageText,
+        }
+    }
+    callSendApi(messageData);
+}
+
 function handleMessage(senderId, event){
     if(event.text){
         // defaultMessage(senderId);//mensaje del bot
-        // messageImage(senderId);//imagen graciosa
-        // contactSuppport(senderId);//Contactanos
+        messageImage(senderId);//imagen graciosa
         // showLocations(senderId);//Contactanos
-        receipt(senderId);
+        // receipt(senderId);
     } else if (event.attachments) {
         handleAttachments(senderId, event)
     }
+    // var senderID =event.sender.id;
+    // var recipientID = event.recipient.id;
+    // var timeOfMessage = event.timestamp;
+    // var message = event.message;
+    // console.log('recibiendo el mensaje',
+    // senderID,recipientID, timeOfMessage);
+    // console.log(JSON.stringify(message));
+    // var messageId = message.mid;
+    // var messageText = message.text;
+    // var messageAttachments = message.attachment;
+    // if (messageText){
+    //     switch (messageText){
+    //         case 'hola':
+    //             sendTextMessage(senderId, 'hola mucho gusto');
+    //             break;
+    //         case 'como estas':
+    //             sendTextMessage(senderId, 'Estoy muy bien y tu');
+    //             break;
+    //         default:
+    //             defaultMessage(senderId);
+    //     }
+    // }
+
+
 }
+
+function sendTextMessage(recipientId, messageText){
+    var messageaData ={
+        recipient:{
+            id: recipientId
+        },
+        message: {
+            text: messageText
+        }
+    };
+    callSendApi(messageaData);
+}
+
 function defaultMessage(senderId){
     const messageData = {
         "recipient": {
             "id": senderId
         },
         "message": {
-            "text": "Hola soy un bot de messenger y te invito a utilizar nuestro menu",
+            "text": "Hola soy un BOT de messenger y te invito a utilizar nuestro menu",
             "quick_replies": [
                 {
                     "content_type": "text",
@@ -74,6 +132,7 @@ function defaultMessage(senderId){
             ]
         }
     }
+    console.log(messageData);
     senderActions(senderId)
     callSendApi(messageData);
 }
@@ -82,13 +141,35 @@ function handlePostback(senderId, payload){
     console.log(payload)
     switch (payload) {
         case "GET_STARTED_PIZZAMAN":
-            console.log(payload);
+            console.log('inicia pizzaman');
         break;
         case "PIZZAS_PAYLOAD":
             showPizzas(senderId);
         break;
+        case "PEPPERONI_PAYLOAD":
+            sizePizza(senderId);
+        break;
         case "BBQ_PAYLOAD":
             sizePizza(senderId);
+        break;
+        case "PERSONAL_SIZE_PAYLOAD":
+            senderActions(senderId)
+            getLocation(senderId);
+        break;
+        case "CONTACT_PAYLOAD":
+            senderActions(senderId);
+            contactSuppport(senderId);
+        break;
+        case "LOCATIONS_PAYLOAD":
+            senderActions(senderId);
+            showLocations(senderId);
+        break;
+        case "ABOUT_PAYLOAD":
+            senderActions(senderId);
+            messageImage(senderId);
+        break;
+        default:
+            defaultMessage(senderId);
         break;
     }
 }
@@ -98,7 +179,8 @@ function senderActions(senderId) {
         "recipient": {
             "id": senderId
         },
-        "sender_action": "typing_on"
+        "sender_action": "typing_on",
+        "sender_action": "mark_seen"
     }
     callSendApi(messageData);
 }
@@ -118,18 +200,22 @@ function handleAttachments(senderId, event){
       case "file":
             console.log(attachment_type);
         break;
+      case "location":
+            receipt(senderId);
+        break;
       default:
             console.log(attachment_type);
         break;
     }
 }
 
+/* Funcion para presentar la informacion con el bot */
 function callSendApi(response) {
     request({
         // "uri": "https://graph.facebook.com/me/messages",
-        "uri": "https://graph.facebook.com/v2.6/me/messages",
+        "uri": "https://graph.facebook.com/v2.6/me/messages", //Api de messenger
         "qs": {
-            "access_token": access_token
+            "access_token": access_token //Token del acceso para conectar a la api
         },
         "method": "POST",
         "json": response
@@ -238,7 +324,6 @@ function showLocations(senderId) {
                 "type": "template",
                 "payload": {
                     "template_type": "generic",
-                    // "top_element_style": "large",
                     "elements": [
                         {
                             "title": "Sucursal Mexico",
@@ -383,23 +468,24 @@ function receipt(senderId) {
     callSendApi(messageData);
 }
 //Este metoodo ya no funciona fue parchado po facebook
-// function getLocation(senderId){
-//     const messageData = {
-//         "recipient": {
-//             "id": senderId
-//         },
-//         "message": {
-//             "text": "Ahora ¿Puedes proporcionarnos tu ubicación?",
-//             "quick_replies": [
-//                 {
-//                     "content_type": "location"
-//                 }
-//             ]
-//         }
-//     }
-//     callSendApi(messageData);
-// }
+function getLocation(senderId){
+    const messageData = {
+        "recipient": {
+            "id": senderId
+        },
+        "message": {
+            "text": "Ahora ¿Puedes proporcionarnos tu ubicación?",
+            "quick_replies": [
+                {
+                    "content_type": "location"
+                }
+            ]
+        }
+    }
+    callSendApi(messageData);
+}
 
+/* Funcion para ver que esta funcionando nuestro servidor */
 app.listen(app.get('port'), function(){
     console.log('Nuestro servidor esta funcionando en el puerto: ', app.get('port'));
 });
