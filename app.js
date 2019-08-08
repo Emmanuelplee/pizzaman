@@ -31,9 +31,9 @@ app.post('/webhook/',function(req,res){
         // Validamos si hay message 
     if(webhook_event.messaging){
         webhook_event.messaging.forEach(event => {
-            // handleEvent(event.sender.id, event);
-            console.log('event', event);
-            manejadorMensajes(event);
+             handleEvent(event.sender.id, event);
+             console.log('event', event);
+            // manejadorMensajes(event);//devuelve el mismo mensaje enviado
             // handleMessage(event);
         })
     }
@@ -41,6 +41,7 @@ app.post('/webhook/',function(req,res){
     res.sendStatus(200);
 })
 
+/* Manejador de eventos pasa saber si en un mensaje o un postback */
 function handleEvent(senderId, event){
     if(event.message){
         handleMessage(senderId, event.message);
@@ -66,37 +67,13 @@ function manejadorMensajes (event){
 
 function handleMessage(senderId, event){
     if(event.text){
-        // defaultMessage(senderId);//mensaje del bot
-        messageImage(senderId);//imagen graciosa
+        defaultMessage(senderId);//mensaje del bot
+        // messageImage(senderId);//imagen graciosa
         // showLocations(senderId);//Contactanos
         // receipt(senderId);
     } else if (event.attachments) {
         handleAttachments(senderId, event)
     }
-    // var senderID =event.sender.id;
-    // var recipientID = event.recipient.id;
-    // var timeOfMessage = event.timestamp;
-    // var message = event.message;
-    // console.log('recibiendo el mensaje',
-    // senderID,recipientID, timeOfMessage);
-    // console.log(JSON.stringify(message));
-    // var messageId = message.mid;
-    // var messageText = message.text;
-    // var messageAttachments = message.attachment;
-    // if (messageText){
-    //     switch (messageText){
-    //         case 'hola':
-    //             sendTextMessage(senderId, 'hola mucho gusto');
-    //             break;
-    //         case 'como estas':
-    //             sendTextMessage(senderId, 'Estoy muy bien y tu');
-    //             break;
-    //         default:
-    //             defaultMessage(senderId);
-    //     }
-    // }
-
-
 }
 
 function sendTextMessage(recipientId, messageText){
@@ -133,7 +110,7 @@ function defaultMessage(senderId){
         }
     }
     console.log(messageData);
-    senderActions(senderId)
+    senderActions(senderId);//Acciones del bot 
     callSendApi(messageData);
 }
 

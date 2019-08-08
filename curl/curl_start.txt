@@ -1,0 +1,19 @@
+/*** Boton de empezar en messenger *****/
+curl -X POST -H "Content-Type: application/json" -d '{
+  "get_started": {
+    "payload": 
+    "GET_STARTED_PIZZAMAN"
+  }
+}' "https://graph.facebook.com/v2.6/me/messenger_profile?access_token=EAAI9zhm29X4BAOfNxPfucLMVTrpRJg17WMG4Til0FsCHhQEsQZC3BBRB4baEFFRAm5MccC6cbqngQM7MYYP1l5gp2xHyjqG4hmMrSQrMOrHbuPy14v6f3GWMt9xSyEbrWZC1Xsj0ESERgXCWJ36ykEH9ko3vjwyWs6IjqxCzcKXSK8hAvF"
+
+/*** Mensaje por default antes de iniciar la conversacion***/
+curl -X POST -H "Content-Type: application/json" -d '{
+"greeting": [{
+  "locale": "default",
+  "text": "Hola {{user_first_name}} soy PizzaMan te invito a conocer nuestras geniales PizzasMan .!"
+}, {
+  "locale": "en_US",
+  "text": "Hello {{user_first_name}}  PizzasMan .!"
+}]
+}
+' "https://graph.facebook.com/v2.6/me/messenger_profile?access_token=EAAI9zhm29X4BAOfNxPfucLMVTrpRJg17WMG4Til0FsCHhQEsQZC3BBRB4baEFFRAm5MccC6cbqngQM7MYYP1l5gp2xHyjqG4hmMrSQrMOrHbuPy14v6f3GWMt9xSyEbrWZC1Xsj0ESERgXCWJ36ykEH9ko3vjwyWs6IjqxCzcKXSK8hAvF"
